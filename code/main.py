@@ -107,7 +107,6 @@ class Flack:
         pygame.draw.circle(WINDOW, self.color, (self.f_x, self.f_y), self.sx_t)
 
         if self.x_t > 100:
-            self.blowUpYes = False
             self.beginOfEnd = True
         
         # print("x_t: ", self.x_t, "blow up: ", self.blowUpYes)
@@ -119,11 +118,6 @@ class Flack:
             # print('arrived!!!')
         if self.blowUpYes == True:
             self.explode()
-        elif self.blowUpYes == True and self.beginOfEnd == True:
-            del self
-        
-        # self.x_t, self.sx_t = self.exp_timer(self.x_t, self.sx_t)
-        # pygame.draw.circle(WINDOW, "blue", (self.m_x, self.m_y), self.sx_t)
         
 
 flackList = []
@@ -175,6 +169,8 @@ def main () :
             if len(flackList) > 0:
                 f.create_flack()
                 f.move()
+            if f.beginOfEnd == True and f.blowUpYes == True:
+                flackList.remove(f)
             f.update()
             
 
