@@ -23,8 +23,9 @@ pygame.time.set_timer(SPAWNMISSILE, random.randint(1000, 2000))
 missileList = []
 
 
-class ALine():
+class ALine(pygame.sprite.Sprite):
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
         self.x_pos = random.randint(20, WINDOW_WIDTH - 20)
         self.startPos = pygame.Vector2((self.x_pos, 0))
         self.endPos = pygame.Vector2((self.x_pos, 0))
@@ -55,8 +56,9 @@ def misExplosion(endPos):
         pygame.draw.circle(WINDOW, 'red', endPos, rad)
     
 
-class Flack:
+class Flack(pygame.sprite.Sprite):
     def __init__(self, m_x, m_y):
+        pygame.sprite.Sprite.__init__(self)
         self.start_loc = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2)
         self.f_x, self.f_y = self.start_loc
         self.add_x, self.add_y = self.calcAngle(self.start_loc, (m_x, m_y))
@@ -104,7 +106,7 @@ class Flack:
 
     def explode(self):        
         self.x_t, self.sx_t = self.exp_timer(self.x_t, self.sx_t)
-        pygame.draw.circle(WINDOW, self.color, (self.f_x, self.f_y), self.sx_t)
+        self.flk = pygame.draw.circle(WINDOW, self.color, (self.f_x, self.f_y), self.sx_t)
 
         if self.x_t > 100:
             self.beginOfEnd = True
@@ -119,12 +121,21 @@ class Flack:
         if self.blowUpYes == True:
             self.explode()
         
+class Building(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
 
-flackList = []
+        self.image = pygame.surface.Surface((50,50))
+        self.rect = self.image.get_rect(center = (25,25))
+    
+
+flackList = pygame.sprite.Group()
+
+buildingList = pygame.sprite.Group()
 
 flack1 = Flack(200,200)
 
-
+missileList = pygame.sprite.Group()
 
 # The main function that controls the game
 def main () :
@@ -142,7 +153,8 @@ def main () :
                 time_to_fire = True
             if event.type == MOUSEBUTTONDOWN:
                 m_x, m_y = pygame.mouse.get_pos()
-                flackList.append(Flack(m_x, m_y))
+                # flackList.append(Flack(m_x, m_y))
+                flackList.add(Flack(m_x, m_y))
 
     
         # Processing
@@ -153,14 +165,15 @@ def main () :
         WINDOW.fill(BACKGROUND)
 
         if time_to_fire == True:
-            missileList.append(ALine())
+            # missileList.append(ALine())
+            missileList.add(ALine())
             time_to_fire = False
 
         for m in missileList:
             if len(missileList) > 0:
                 m.drawLine(WINDOW)
             if m.endPos[1] > WINDOW_HEIGHT:
-                print("index: ", missileList.index(m))
+                # print("index: ", missileList.index(m))
                 misExplosion(m.endPos)
                 missileList.remove(m) # erase missile trail
 
@@ -169,6 +182,10 @@ def main () :
             if len(flackList) > 0:
                 f.create_flack()
                 f.move()
+            for m in missileList:
+                # not working
+                if f.flk.collidepoint(m.endPos):
+                    missileList.remove(m)
             if f.beginOfEnd == True and f.blowUpYes == True:
                 flackList.remove(f)
             f.update()
